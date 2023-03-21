@@ -20,7 +20,7 @@ emotionsMain = []
 timeMain = []
 
 
-with open("plot2.csv", 'r') as csvfile:
+with open("plot3.csv", 'r') as csvfile:
     plots = csv.reader(csvfile, delimiter=',')
     plotData = list(plots)
     for row in plotData:
@@ -81,11 +81,23 @@ for i in range(0, len(emotionsMain)-windowSize2):
 print(window2Frequency)
 
 thresholdAboveCount = 0
+j = 0
 
-# for i in range(0, len(window1Frequency)-(len(window1Frequency)/3)):
-#     for j in range(i, i+(len(window1Frequency)/3)):
-#         if(window1Frequency[j]>76.0):
-#             thresholdAboveCount+=1
+# 12:45:15
+start = 0
+stop = 0
+for i in range(len(window1Frequency)):
+    if (window1Frequency[i] > 75):
+        if j == 0:
+            start = int(timeMain[i][3:5])/60 + int(timeMain[i][6:])
+        j += 1
+
+    elif (i > 0 and window1Frequency[i] < 75 and window1Frequency[i-1] > 75):
+        stop = int(timeMain[i][3:5])/60 + int(timeMain[i][6:])
+        print("Distress level peak duration", stop-start)
+        print(j)
+        j = 0
+
 
 print(thresholdAboveCount/len(window1Frequency))
 
@@ -93,16 +105,18 @@ print(thresholdAboveCount/len(window1Frequency))
 plt.xlabel("Time", fontsize=2)
 plt.ylabel("Distraction Level")
 plt.xticks(rotation=90)
-f_smoothed = signal.savgol_filter(window2Frequency, 12, 3)
-freqs = fft.rfft(f_smoothed)
-freqs = freqs*numpy.array(list([int(x < 7)
-                          for x in range(len(freqs))]), dtype=numpy.int32)
-freqs = fft.irfft(freqs)
-x_vals = list([x for x in range(len(freqs))])
-f_cubic = interpolate.CubicSpline(x_vals[::10], freqs[::10])
-f_cubic = numpy.vectorize(f_cubic)
-# plt.plot(window2Time, f_smoothed, color='red')
-# plt.plot(window2Time, f_cubic(x_vals), color='red')
-smoooooth = numpy.linspace(min(x_vals), max(x_vals), 5000)
-plt.plot(smoooooth, f_cubic(smoooooth))
+plt.plot(window1Time,window1Frequency)
+# f_smoothed = signal.savgol_filter(window2Frequency, 12, 3)
+# freqs = fft.rfft(f_smoothed)
+# freqs = freqs*numpy.array(list([int(x < 7)
+#                           for x in range(len(freqs))]), dtype=numpy.int32)
+# freqs = fft.irfft(freqs)
+# x_vals = list([x for x in range(len(freqs))])
+# f_cubic = interpolate.CubicSpline(x_vals[::10], freqs[::10])
+# f_cubic = numpy.vectorize(f_cubic)
+# # plt.plot(window2Time, f_smoothed, color='red')
+# # plt.plot(window2Time, f_cubic(x_vals), color='red')
+# smoooooth = numpy.linspace(min(x_vals), max(x_vals), 5000)
+# plt.plot(smoooooth, f_cubic(smoooooth))
+
 plt.show()
