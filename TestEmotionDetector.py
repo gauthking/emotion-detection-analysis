@@ -30,20 +30,20 @@ print("Loaded model from disk")
 # you may download one from here : https://www.pexels.com/video/three-girls-laughing-5273028/
 cap = cv2.VideoCapture(0)
 
-
-f = open('plot3.csv', 'w')
-wrtr = csv.writer(f, delimiter=',', quotechar='"')
+colNames = ["Mood", "Time"]
+with open("plot3.csv", 'w') as csv_file:
+    csv_writer = csv.DictWriter(csv_file, fieldnames=colNames)
+    csv_writer.writeheader()
 
 
 def write_into_csv(fields):
-    if fields[0] == "Distracted":
-        global hcount
-        wrtr.writerow(fields)
-        f.flush()
-    elif fields[0] == "Neutral":
-        global ncount
-        wrtr.writerow(fields)
-        f.flush()
+    with open("plot3.csv", 'a') as csv_file:
+        csv_writer = csv.DictWriter(csv_file, fieldnames=colNames)
+        info = {
+            "Mood": fields[0],
+            "Time": fields[1]
+        }
+        csv_writer.writerow(info)
 
 
 while True:
@@ -72,7 +72,7 @@ while True:
         maxindex = int(np.argmax(emotion_prediction))
         cv2.putText(frame, emotion_dict[maxindex], (x+5, y-20),
                     cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
-        if (emotion_dict[maxindex] == "Angry" or emotion_dict[maxindex] == "Disgusted" or emotion_dict[maxindex] == "Fearful" or emotion_dict[maxindex] == "Sad"):
+        if (emotion_dict[maxindex] == "Angry" or emotion_dict[maxindex] == "Disgusted" or emotion_dict[maxindex] == "Fearful" or emotion_dict[maxindex] == "Surprised"):
             fields = ["Distracted",
                       datetime.datetime.now().strftime("%H:%M:%S")]
             write_into_csv(fields)
