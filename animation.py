@@ -9,7 +9,7 @@ y = []
 
 def animate(i):
     dat = pd.read_csv(
-        "D:\\MainFolders\\VIT\\ACADEMICYEAR\\secondYEAR\\fourthsem\\sensors-da\\emotion-detection\\Emotion_detection_with_CNN\\freqvtimew1.csv")
+        "D:\\VIT\\Sensors Project\\emotion-detection-analysis\\freqvtimew1.csv")
     x = dat['Time']
     y = dat['DistressFreq']
     print(x, y)

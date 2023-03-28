@@ -33,10 +33,7 @@ def compute_threshold_ranges(window1Frequency, timeMain):
                 f"Distraction level - {levelsCount} start time - {start} end time - {str(timeMain[i])}. Estimated duration of distraction - ", datetime.strptime(str(timeMain[i]), "%H:%M:%S") - datetime.strptime(start, "%H:%M:%S"))
             j = 0
             start = ''
-        # if (i == len(window1Frequency)-1):
-        #     levelsCount += 1
-        #     print(
-        #         f"Distraction level - {levelsCount} start time - {start} end time - {str(timeMain[0][i])}. Estimated duration of distraction - ", datetime.strptime(str(timeMain[0][i]), "%H:%M:%S") - datetime.strptime(str(start), "%H:%M:%S"))
+       
 
 
 fields = ["DistressFreq", "Time"]
