@@ -33,7 +33,6 @@ def compute_threshold_ranges(window1Frequency, timeMain):
                 f"Distraction level - {levelsCount} start time - {start} end time - {str(timeMain[i])}. Estimated duration of distraction - ", datetime.strptime(str(timeMain[i]), "%H:%M:%S") - datetime.strptime(start, "%H:%M:%S"))
             j = 0
             start = ''
-       
 
 
 fields = ["DistressFreq", "Time"]
@@ -41,7 +40,6 @@ with open("freqvtimew1.csv", 'w') as csv_file:
     csv_writer = csv.DictWriter(csv_file, fieldnames=fields)
     csv_writer.writeheader()
 
-time.sleep(10)
 window1Frequency = []
 window1Time = []
 for ch in pd.read_csv("plot3.csv", chunksize=windowSize1):
@@ -67,7 +65,7 @@ for ch in pd.read_csv("plot3.csv", chunksize=windowSize1):
         count = 0
         window1Frequency = []
         window1Time = []
-    time.sleep(1)
+    time.sleep(2)
 
 
 # # plotting code

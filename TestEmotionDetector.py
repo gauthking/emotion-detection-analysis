@@ -3,9 +3,10 @@ import numpy as np
 from keras.models import model_from_json
 import matplotlib.pyplot as plt
 from matplotlib import animation
-import datetime
+from datetime import datetime
 import csv
 import time
+import pandas as pd
 
 
 starttime = time.time()
@@ -35,6 +36,40 @@ with open("plot3.csv", 'w') as csv_file:
     csv_writer = csv.DictWriter(csv_file, fieldnames=colNames)
     csv_writer.writeheader()
 
+fields1 = ["DistressFreq", "Time"]
+with open("freqvtimew1.csv", 'w') as csv_file:
+    csv_writer = csv.DictWriter(csv_file, fieldnames=fields1)
+    csv_writer.writeheader()
+
+
+windowSize = 10
+
+start = ''
+
+
+def compute_threshold_ranges(freqRange, ti):
+    global start
+    j = 0
+    levelsCount = 0
+    for i in range(len(freqRange)):
+        if (freqRange[i] > 75):
+            if j == 0:
+                start = ti[i]
+                print(start)
+            j += 1
+        elif (freqRange[i] < 75 and start != ''):
+            levelsCount += 1
+            print(
+                f"Distraction level - {levelsCount} start time - {start} end time - {str(ti[i])}. Estimated duration of distraction - ", datetime.strptime(str(ti[i]), "%H:%M:%S") - datetime.strptime(start, "%H:%M:%S"))
+
+            with open("report.txt", 'a') as file:
+                est = datetime.strptime(
+                    str(ti[i]), "%H:%M:%S") - datetime.strptime(start, "%H:%M:%S")
+                file.write(
+                    f"Distraction level - {levelsCount} start time - {start} end time - {str(ti[i])}. Estimated duration of distraction -{est}"+"\n")
+            j = 0
+            start = ''
+
 
 def write_into_csv(fields):
     with open("plot3.csv", 'a') as csv_file:
@@ -45,6 +80,14 @@ def write_into_csv(fields):
         }
         csv_writer.writerow(info)
 
+
+countCall = 0
+tempEmot = []
+tempTime = []
+
+rangeCount = 0
+rangeFreq = []
+rangeTime = []
 
 while True:
     # Find haar cascade to draw bounding box around face
@@ -73,12 +116,45 @@ while True:
         cv2.putText(frame, emotion_dict[maxindex], (x+5, y-20),
                     cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
         if (emotion_dict[maxindex] == "Angry" or emotion_dict[maxindex] == "Disgusted" or emotion_dict[maxindex] == "Fearful" or emotion_dict[maxindex] == "Surprised"):
+            ti = datetime.now().strftime("%H:%M:%S")
             fields = ["Distracted",
-                      datetime.datetime.now().strftime("%H:%M:%S")]
+                      ti]
             write_into_csv(fields)
+            countCall += 1
+            tempEmot.append("Distracted")
+            tempTime.append(ti)
         else:
-            fields = ["Neutral", datetime.datetime.now().strftime("%H:%M:%S")]
+            ti = datetime.now().strftime("%H:%M:%S")
+            fields = ["Neutral", ti]
             write_into_csv(fields)
+            countCall += 1
+            tempEmot.append("Neutral")
+            tempTime.append(ti)
+        if (countCall % windowSize == 0):
+            tempDict = {"tD": 0, "tN": 0}
+            for i in range(len(tempEmot)):
+                if (tempEmot[i] == "Distracted"):
+                    tempDict["tD"] += 1
+                elif (tempEmot[i] == "Neutral"):
+                    tempDict["tN"] += 1
+            with open("freqvtimew1.csv", 'a') as csv_file:
+                csv_writer = csv.DictWriter(csv_file, fieldnames=fields1)
+                info = {
+                    "DistressFreq": (tempDict['tD']/windowSize)*100,
+                    "Time": tempTime[0]
+                }
+                csv_writer.writerow(info)
+            rangeCount += 1
+            rangeFreq.append((tempDict['tD']/windowSize)*100)
+            rangeTime.append(tempTime[0])
+            tempTime = []
+            tempEmot = []
+
+        if (rangeCount == 7):
+            compute_threshold_ranges(rangeFreq, rangeTime)
+            rangeCount = 0
+            rangeFreq = []
+            rangeTime = []
 
     cv2.imshow('Emotion Detection', frame)
     if cv2.waitKey(1) & 0xFF == ord('q'):
