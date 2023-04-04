@@ -5,11 +5,12 @@ import matplotlib.pyplot as plt
 from matplotlib import animation
 from datetime import datetime
 import csv
-import time
-import pandas as pd
+import winsound
 
 
-starttime = time.time()
+beepFreq = 2500
+duration = 1400
+
 
 emotion_dict = {0: "Angry", 1: "Disgusted", 2: "Fearful",
                 3: "Happy", 4: "Neutral", 5: "Sad", 6: "Surprised"}
@@ -45,11 +46,11 @@ with open("freqvtimew1.csv", 'w') as csv_file:
 windowSize = 10
 
 start = ''
+j = 0
 
 
 def compute_threshold_ranges(freqRange, ti):
-    global start
-    j = 0
+    global start, j
     levelsCount = 0
     for i in range(len(freqRange)):
         if (freqRange[i] > 75):
@@ -61,6 +62,7 @@ def compute_threshold_ranges(freqRange, ti):
             levelsCount += 1
             print(
                 f"Distraction level - {levelsCount} start time - {start} end time - {str(ti[i])}. Estimated duration of distraction - ", datetime.strptime(str(ti[i]), "%H:%M:%S") - datetime.strptime(start, "%H:%M:%S"))
+            winsound.Beep(beepFreq, duration)
 
             with open("report.txt", 'a') as file:
                 est = datetime.strptime(
