@@ -8,10 +8,9 @@ y = []
 
 def animate(i):
     dat = pd.read_csv(
-        "freqvtimew1.csv")
-    x = dat['Time']
-    y = dat['DistressFreq']
-    print(x, y)
+        "bpmFreqVtime.csv")
+    x = dat['time']
+    y = dat['bpmFreq']
     plt.cla()
     plt.plot(x, y)
 

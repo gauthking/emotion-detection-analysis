@@ -2,13 +2,12 @@ import cv2
 import numpy as np
 from keras.models import model_from_json
 import matplotlib.pyplot as plt
-from matplotlib import animation
 from datetime import datetime
 import csv
 import winsound
 
 
-beepFreq = 2500
+beepFreq = 1500
 duration = 1400
 
 
@@ -42,6 +41,11 @@ with open("freqvtimew1.csv", 'w') as csv_file:
     csv_writer = csv.DictWriter(csv_file, fieldnames=fields1)
     csv_writer.writeheader()
 
+fields2 = ["starttime", "endtime", "seconds"]
+with open("distressRanges.csv", 'w') as csv_file:
+    csv_writer = csv.DictWriter(csv_file, fieldnames=fields2)
+    csv_writer.writeheader()
+
 
 windowSize = 10
 
@@ -63,12 +67,16 @@ def compute_threshold_ranges(freqRange, ti):
             print(
                 f"Distraction level - {levelsCount} start time - {start} end time - {str(ti[i])}. Estimated duration of distraction - ", datetime.strptime(str(ti[i]), "%H:%M:%S") - datetime.strptime(start, "%H:%M:%S"))
             winsound.Beep(beepFreq, duration)
-
-            with open("report.txt", 'a') as file:
-                est = datetime.strptime(
-                    str(ti[i]), "%H:%M:%S") - datetime.strptime(start, "%H:%M:%S")
-                file.write(
-                    f"Distraction level - {levelsCount} start time - {start} end time - {str(ti[i])}. Estimated duration of distraction -{est}"+"\n")
+            est = datetime.strptime(
+                str(ti[i]), "%H:%M:%S") - datetime.strptime(start, "%H:%M:%S")
+            with open("distressRanges.csv", 'a') as csv_file:
+                csv_writer = csv.DictWriter(csv_file, fieldnames=fields2)
+                info = {
+                    "starttime": start,
+                    "endtime": str(ti[i]),
+                    "seconds": est
+                }
+                csv_writer.writerow(info)
             j = 0
             start = ''
 
@@ -124,6 +132,13 @@ while True:
             write_into_csv(fields)
             countCall += 1
             tempEmot.append("Distracted")
+            tempTime.append(ti)
+        elif (emotion_dict[maxindex] != "Angry" or emotion_dict[maxindex] != "Disgusted" or emotion_dict[maxindex] != "Fearful" or emotion_dict[maxindex] != "Surprised"):
+            ti = datetime.now().strftime("%H:%M:%S")
+            fields = ["Neutral", ti]
+            write_into_csv(fields)
+            countCall += 1
+            tempEmot.append("Neutral")
             tempTime.append(ti)
         else:
             ti = datetime.now().strftime("%H:%M:%S")

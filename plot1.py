@@ -1,8 +1,14 @@
-import pandas as pd
+import csv
 import time
-chunk = 20
 
-for ch in pd.read_csv("plot3.csv", chunksize=chunk):
-    print(list(ch['Time'])[0])
+list1 = []
 
-    time.sleep(5)
+while True:
+    with open('distressRanges.csv', 'r') as file:
+        reader = csv.reader(file)
+        for row in reader:
+            if (row not in list1):
+                list1.append(row)  # or do something with the row data
+                print(row)
+
+    time.sleep(1)  # check for updates every 1 second
