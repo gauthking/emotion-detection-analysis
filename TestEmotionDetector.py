@@ -6,11 +6,11 @@ from datetime import datetime
 import csv
 import winsound
 
-
+# beep sound config
 beepFreq = 1500
 duration = 1400
 
-
+# set of emotions detected by the model
 emotion_dict = {0: "Angry", 1: "Disgusted", 2: "Fearful",
                 3: "Happy", 4: "Neutral", 5: "Sad", 6: "Surprised"}
 
@@ -24,13 +24,10 @@ emotion_model = model_from_json(loaded_model_json)
 emotion_model.load_weights("./model/emotion_model.h5")
 print("Loaded model from disk")
 
-# start the webcam feed
-# cap = cv2.VideoCapture(0)
-
-# pass here your video path
-# you may download one from here : https://www.pexels.com/video/three-girls-laughing-5273028/
+# to capture the realtime video footage
 cap = cv2.VideoCapture(0)
 
+# opening few csv files to store the captured and computed values for reference and other analysis
 colNames = ["Mood", "Time"]
 with open("plot3.csv", 'w') as csv_file:
     csv_writer = csv.DictWriter(csv_file, fieldnames=colNames)
@@ -46,13 +43,13 @@ with open("distressRanges.csv", 'w') as csv_file:
     csv_writer = csv.DictWriter(csv_file, fieldnames=fields2)
     csv_writer.writeheader()
 
-
+# defining the sliding window size
 windowSize = 10
 
 start = ''
 j = 0
 
-
+# function to compute the threshold ranges from the sliding window frequency data
 def compute_threshold_ranges(freqRange, ti):
     global start, j
     levelsCount = 0
@@ -147,6 +144,8 @@ while True:
             countCall += 1
             tempEmot.append("Neutral")
             tempTime.append(ti)
+            
+        # sliding window code...
         if (countCall % windowSize == 0):
             tempDict = {"tD": 0, "tN": 0}
             for i in range(len(tempEmot)):
@@ -166,7 +165,7 @@ while True:
             rangeTime.append(tempTime[0])
             tempTime = []
             tempEmot = []
-
+  
         if (rangeCount == 7):
             compute_threshold_ranges(rangeFreq, rangeTime)
             rangeCount = 0
